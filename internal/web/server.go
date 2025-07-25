@@ -21,11 +21,11 @@ func New(cfg *config.Config, log *slog.Logger, db *postgres.Storage) *Server {
 
 	return &Server{
 		address: cfg.Address,
-		router:  newRouter(log, db),
+		router:  newRouter(log, db, cfg),
 	}
 }
 
-func newRouter(log *slog.Logger, db *postgres.Storage) *gin.Engine {
+func newRouter(log *slog.Logger, db *postgres.Storage, cfg *config.Config) *gin.Engine {
 	router := gin.New()
 
 	router.Use(gin.Recovery())
@@ -37,7 +37,7 @@ func newRouter(log *slog.Logger, db *postgres.Storage) *gin.Engine {
 		{
 			v12 := v1.Group("/delete")
 			v12.Use(gin.BasicAuth(gin.Accounts{
-				"bob": "123",
+				cfg.User: cfg.Password,
 			}))
 			v12.DELETE("", handler.Delete(log, db))
 		}
