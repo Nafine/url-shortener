@@ -60,6 +60,9 @@ jobs:
           echo "Listing project files"
           ls -a ${{ github.workspace }}
           pwd
+      - name: Show systemd file
+        run: |
+          cat ${{ github.workspace }}/deploy/url-shortener.service
       - name: Copy systemd service file
         run: |
           scp -i deploy_key -o StrictHostKeyChecking=no ${{ github.workspace }}/deploy/url-shortener.service ${{ env.HOST }}:/tmp/url-shortener.service
