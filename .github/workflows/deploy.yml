@@ -11,27 +11,27 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      HOST: s465967@helios.cs.ifmo.ru
+      HOST: root@94.177.51.185
       DEPLOY_DIRECTORY: /apps/url-shortener
       CONFIG_PATH: /apps/url-shortener/config/prod.yml
       ENV_FILE_PATH: /apps/url-shortener/config/config.env	
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.tag }}
-      - name: check tag exists
+      - name: Check tag exists
         run: |
           git fetch --all --tags
           if ! git tag | grep -q "^${{ github.event.inputs.tag }}$"; then
             echo "error: Tag '${{ github.event.inputs.tag }}' not exists"
             exit 1
           fi
-      - name: setup go
+      - name: Setup go
         uses: actions/setup-go@v2
         with:
           go-version: 1.24
-      - name: build
+      - name: Build
         run: |
           go mod download
           go build -o url-shortener ./cmd
@@ -40,7 +40,7 @@ jobs:
           sudo apt-get install -y ssh rsync
           echo "$DEPLOY_SSH_KEY" > deploy_key
           chmod 600 deploy_key
-          ssh -i deploy_key -o StrictHostKeyChecking=no -p 2222 ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
+          ssh -i deploy_key -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
           rsync -avz -e 'ssh -i deploy_key -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -51,17 +51,18 @@ jobs:
         run: |
           echo "Listing deployment folder contents:"
           ls -la ${{ github.workspace }}/deployment
-      - name: Create environment file on server
+      - name: Create env file on server
         run: |
           ssh -i deploy_key -o StrictHostKeyChecking=no ${{ env.HOST }} "\
           touch ${{ env.ENV_FILE_PATH }} && \
           chmod 600 ${{ env.ENV_FILE_PATH }} && \
           echo 'CONFIG_PATH=${{ env.CONFIG_PATH }}' > ${{ env.ENV_FILE_PATH }} && \
-          echo 'HTTP_SERVER_PASSWORD=${{ secrets.AUTH_PASS }}' >> ${{ env.ENV_FILE_PATH }}"
+          echo 'HTTP_SERVER_PASSWORD=${{ secrets.AUTH_PASS }}' >> ${{ env.ENV_FILE_PATH }} && \
+          echo 'STORAGE_PATH=${{ secrets.STORAGE_PATH }}' >> ${{ env.ENV_FILE_PATH }}"
       - name: Copy systemd service file
         run: |
           scp -i deploy_key -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/url-shortener.service ${{ env.HOST }}:/tmp/url-shortener.service
           ssh -i deploy_key -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/url-shortener.service /etc/systemd/system/url-shortener.service"
       - name: Start application
         run: |
-          ssh -i deploy_key -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart url-shortener.service"	
+          ssh -i deploy_key -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart url-shortener.service"

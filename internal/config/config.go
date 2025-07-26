@@ -18,7 +18,7 @@ type HTTPServer struct {
 
 type Config struct {
 	Env        string `yaml:"env" env-default:"local"`
-	Storage    string `yaml:"storage" env-default:"postgres://localhost:5432"`
+	Storage    string `yaml:"storage" env-required:"true"`
 	HTTPServer `yaml:"http_server"`
 }
 

@@ -1,7 +1,0 @@
-env: "local"
-storage: "postgres://bigbob:4823@localhost:5432/url_shortener?sslmode=disable"
-http_server:
-  address: ":8080"
-  timeout: 4s
-  idle_timeout: 60s
-  user: "abunga323"
