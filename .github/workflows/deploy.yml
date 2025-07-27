@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: |
           go mod download
-          go build -o url-shortener ./cmd
+          go build -o url-shortener ./cmd/url-shortener
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
@@ -59,6 +59,7 @@ jobs:
         run: |
           echo "Listing project files"
           ls -a ${{ github.workspace }}
+          echo "Show workspace"
           pwd
       - name: Show systemd file
         run: |

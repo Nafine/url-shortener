@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"url-shortener/internal/db"
 	"url-shortener/internal/logger"
-	"url-shortener/internal/pkg/random"
+	"url-shortener/internal/random"
 	"url-shortener/internal/web/api"
 )
 

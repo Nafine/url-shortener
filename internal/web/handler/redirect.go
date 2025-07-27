@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/logger"
@@ -13,7 +15,7 @@ type URLGetter interface {
 }
 
 type Alias struct {
-	Alias string `uri:"alias" binding:"required" validate:"required,url"`
+	Alias string `uri:"alias" binding:"required" validate:"required,urlsegment"`
 }
 
 var (
@@ -30,7 +32,10 @@ func Redirect(log *slog.Logger, urlGetter URLGetter) gin.HandlerFunc {
 
 		var alias Alias
 
-		if err := c.ShouldBindUri(&alias); err != nil {
+		if err := errors.Join(
+			c.ShouldBindUri(&alias),
+			validator.New().Struct(&alias),
+		); err != nil {
 			log.Info(InfoInvalidAlias, logger.Err(err))
 			c.JSON(http.StatusBadRequest, ErrInvalidAlias)
 			return

@@ -25,8 +25,13 @@ func TestRedirect(t *testing.T) {
 			alias: "123",
 		},
 		{
-			name:      "error",
+			name:      "invalid alias1",
 			alias:     "1 23",
+			funcError: ErrInvalidAlias.Error,
+		},
+		{
+			name:      "invalid alias2",
+			alias:     "123<<",
 			funcError: ErrInvalidAlias.Error,
 		},
 	}

@@ -1,23 +1,23 @@
-package app
+package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"fmt"
 	"os"
 	"url-shortener/internal/config"
 	"url-shortener/internal/db/postgres"
 	"url-shortener/internal/logger"
+	"url-shortener/internal/validation"
 	"url-shortener/internal/web"
 )
 
-type App struct {
-	router *gin.Engine
-}
-
-func Run() {
-	cfg := config.Get()
+func main() {
+	cfg, err := config.Get()
+	if err != nil {
+		fmt.Println("Error loading config: ", err)
+		os.Exit(1)
+	}
 
 	log := logger.New(cfg)
-
 	log.Info("logger initialized")
 	log.Debug("debug messages enabled")
 
@@ -28,6 +28,7 @@ func Run() {
 	}
 	log.Info("database initialized")
 
+	validation.Init()
 	server := web.New(cfg, log, db)
 
 	log.Info("starting server")

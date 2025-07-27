@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
@@ -22,14 +23,14 @@ type Config struct {
 	HTTPServer `yaml:"http_server"`
 }
 
-func Get() *Config {
+func Get() (*Config, error) {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		log.Fatal("CONFIG_PATH environment variable not set")
+		return nil, errors.New("CONFIG_PATH environment variable not set")
 	}
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatal("can't find config file at path: ", configPath)
+		return nil, errors.New("can't find config file at path: " + configPath)
 	}
 
 	var cfg Config
@@ -39,5 +40,5 @@ func Get() *Config {
 	}
 
 	fmt.Println("Read config file:", configPath, cfg)
-	return &cfg
+	return &cfg, nil
 }
