@@ -30,18 +30,18 @@ func TestDelete(t *testing.T) {
 		{
 			name:      "delete fail",
 			alias:     "Oleg",
-			funcError: ErrURLNotExist.Error,
+			funcError: api.ErrURLNotExist.Error,
 			mockError: db.ErrURLNotFound,
 		},
 		{
 			name:      "empty alias",
 			alias:     "",
-			funcError: ErrEmptyAlias.Error,
+			funcError: api.ErrEmptyAlias.Error,
 		},
 		{
 			name:      "deletion error",
 			alias:     "idk",
-			funcError: ErrDeletion.Error,
+			funcError: api.ErrDeletion.Error,
 			mockError: errors.New("unexpected error"),
 		},
 	}

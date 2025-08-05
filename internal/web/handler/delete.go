@@ -8,6 +8,7 @@ import (
 	"url-shortener/internal/db"
 	"url-shortener/internal/logger"
 	"url-shortener/internal/web/api"
+	"url-shortener/internal/web/middleware"
 )
 
 type DeleteRequest struct {
@@ -18,48 +19,39 @@ type URLDeleter interface {
 	DeleteURL(string) error
 }
 
-var (
-	ErrDeletion    = api.Error("error deleting url")
-	ErrURLNotExist = api.Error("URL does not exist")
-)
-
-var (
-	InfoURLNotFound    = "url was not found"
-	InfoURLDeletionErr = "url deletion error"
-)
-
 func Delete(log *slog.Logger, urlDeleter URLDeleter) gin.HandlerFunc {
 	const op = "handler.Delete"
 
 	return func(c *gin.Context) {
 		log := log.With("operation", op)
 
-		var req DeleteRequest
-
-		if err := c.ShouldBindJSON(&req); err != nil {
-			log.Info(InfoInvalidRequest, logger.Err(err))
+		req, ok := c.Get(middleware.RequestBody)
+		if !ok {
+			log.Info(api.InfoMissingRequestBody)
 			c.JSON(http.StatusBadRequest, api.ErrInvalidRequest)
 			return
 		}
 
-		if req.Alias == "" {
-			log.Info(InfoEmptyAlias)
-			c.JSON(http.StatusBadRequest, ErrEmptyAlias)
+		deleteReq := req.(DeleteRequest)
+
+		if deleteReq.Alias == "" {
+			log.Info(api.InfoEmptyAlias)
+			c.JSON(http.StatusBadRequest, api.ErrEmptyAlias)
 			return
 		}
 
-		if err := urlDeleter.DeleteURL(req.Alias); err != nil {
+		if err := urlDeleter.DeleteURL(deleteReq.Alias); err != nil {
 			if errors.Is(err, db.ErrURLNotFound) {
-				log.Info(InfoURLNotFound, logger.Err(err))
-				c.JSON(http.StatusOK, ErrURLNotExist)
+				log.Info(api.InfoURLNotFound, logger.Err(err))
+				c.JSON(http.StatusOK, api.ErrURLNotExist)
 				return
 			}
-			log.Info(InfoURLDeletionErr, logger.Err(err))
-			c.JSON(http.StatusInternalServerError, ErrDeletion)
+			log.Info(api.InfoURLDeletionErr, logger.Err(err))
+			c.JSON(http.StatusInternalServerError, api.ErrDeletion)
 			return
 		}
 
-		log.Info("deletion succeed", slog.String("alias", req.Alias))
+		log.Info("deletion succeed", slog.String("alias", deleteReq.Alias))
 		c.JSON(http.StatusOK, api.Ok())
 	}
 }

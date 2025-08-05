@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"regexp"
 )
@@ -15,4 +16,5 @@ func Init() {
 		matched, _ := regexp.MatchString(pattern, token)
 		return matched
 	})
+	fmt.Println("Validator initialized")
 }

@@ -14,6 +14,7 @@ import (
 	"testing"
 	"url-shortener/internal/db"
 	"url-shortener/internal/logger"
+	"url-shortener/internal/web/api"
 	"url-shortener/internal/web/handler/mocks"
 )
 
@@ -47,13 +48,13 @@ func TestSave(t *testing.T) {
 			name:      "save fail",
 			url:       "http://test.com",
 			alias:     "alias",
-			funcError: ErrFailSaveURL.Error,
+			funcError: api.ErrSave.Error,
 			mockError: errors.New("unexpected error"),
 		},
 		{
 			name:      "existing url",
 			url:       "http://existing.com",
-			funcError: ErrURLExists.Error,
+			funcError: api.ErrURLExists.Error,
 			mockError: db.ErrURLAlreadyExists,
 		},
 	}
