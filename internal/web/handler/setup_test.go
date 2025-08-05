@@ -7,4 +7,5 @@ import (
 
 func TestMain(m *testing.M) {
 	validation.Init()
+	m.Run()
 }

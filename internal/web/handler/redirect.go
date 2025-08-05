@@ -3,11 +3,12 @@ package handler
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"net/http"
+	"url-shortener/internal/db"
 	"url-shortener/internal/logger"
 	"url-shortener/internal/web/api"
+	"url-shortener/internal/web/middleware"
 )
 
 type URLGetter interface {
@@ -18,34 +19,31 @@ type Alias struct {
 	Alias string `uri:"alias" binding:"required" validate:"required,urlsegment"`
 }
 
-var (
-	ErrEmptyAlias   = api.Error("empty alias")
-	ErrInvalidAlias = api.Error("invalid alias")
-	ErrNotFound     = api.Error("url not found")
-)
-
 func Redirect(log *slog.Logger, urlGetter URLGetter) gin.HandlerFunc {
 	const op = "handler.Redirect"
 
 	return func(c *gin.Context) {
 		log := log.With("operation", op)
 
-		var alias Alias
-
-		if err := errors.Join(
-			c.ShouldBindUri(&alias),
-			validator.New().Struct(&alias),
-		); err != nil {
-			log.Info(InfoInvalidAlias, logger.Err(err))
-			c.JSON(http.StatusBadRequest, ErrInvalidAlias)
+		segment, ok := c.Get(middleware.SegmentBody)
+		if !ok {
+			log.Info(api.InfoMissingSegment)
+			c.JSON(http.StatusBadRequest, api.ErrInvalidRequest)
 			return
 		}
+
+		alias := segment.(Alias)
 
 		url, err := urlGetter.GetURL(alias.Alias)
 
 		if err != nil {
-			log.Info(InfoURLNotFound, logger.Err(err))
-			c.JSON(http.StatusNotFound, ErrNotFound)
+			if errors.Is(err, db.ErrURLNotFound) {
+				log.Info(api.InfoURLNotFound, logger.Err(err))
+				c.JSON(http.StatusNotFound, api.ErrNotFound)
+				return
+			}
+			log.Info(api.InfoRedirectErr, logger.Err(err))
+			c.JSON(http.StatusInternalServerError, api.ErrRedirect)
 			return
 		}
 

@@ -11,6 +11,7 @@ import (
 	"url-shortener/internal/logger"
 	"url-shortener/internal/random"
 	"url-shortener/internal/web/api"
+	"url-shortener/internal/web/middleware"
 )
 
 type SaveRequest struct {
@@ -27,52 +28,44 @@ type URLSaver interface {
 	SaveURL(string, string) error
 }
 
-var (
-	ErrURLExists   = api.Error("URL already exists")
-	ErrFailSaveURL = api.Error("failed to save url")
-)
-
-var (
-	InfoUrlSaveErr = "failed to save url"
-)
-
 func Save(log *slog.Logger, urlSaver URLSaver) gin.HandlerFunc {
 	const op = "handlers.Save"
 	return func(c *gin.Context) {
 		log := log.With("operation", op)
 
-		var req SaveRequest
-
-		if err := c.ShouldBindJSON(&req); err != nil {
-			log.Info(InfoInvalidRequest, logger.Err(err))
+		req, ok := c.Get(middleware.RequestBody)
+		if !ok {
+			log.Info(api.InfoMissingRequestBody)
 			c.JSON(http.StatusBadRequest, api.ErrInvalidRequest)
 			return
 		}
 
+		saveRequest := req.(SaveRequest)
+
 		if err := validator.New().Struct(req); err != nil {
 			validationErrors := err.(validator.ValidationErrors)
-			log.Info(InfoInvalidRequestFields, logger.Err(err))
+			log.Info(api.InfoInvalidRequestFields, logger.Err(err))
 			c.JSON(http.StatusBadRequest, api.ValidationError(validationErrors))
 			return
 		}
 
-		alias := req.Alias
+		alias := saveRequest.Alias
 		if alias == "" {
 			alias = random.NewRandomPath(rand.Intn(12) + 4)
 		}
 
-		if err := urlSaver.SaveURL(req.Url, alias); err != nil {
+		if err := urlSaver.SaveURL(saveRequest.Url, alias); err != nil {
 			if errors.Is(err, db.ErrURLAlreadyExists) {
-				log.Info(InfoURLExists, logger.Err(err))
-				c.JSON(http.StatusOK, ErrURLExists)
+				log.Info(api.InfoURLExists, logger.Err(err))
+				c.JSON(http.StatusOK, api.ErrURLExists)
 				return
 			}
-			log.Info(InfoUrlSaveErr, logger.Err(err))
-			c.JSON(http.StatusInternalServerError, ErrFailSaveURL)
+			log.Info(api.InfoURLSaveErr, logger.Err(err))
+			c.JSON(http.StatusInternalServerError, api.ErrSave)
 			return
 		}
 
-		log.Info("successfully saved url", slog.String("url", req.Url), slog.String("alias", alias))
+		log.Info("successfully saved url", slog.String("url", saveRequest.Url), slog.String("alias", alias))
 		c.JSON(http.StatusOK, Response{
 			StatusResponse: api.Ok(),
 			Alias:          alias,

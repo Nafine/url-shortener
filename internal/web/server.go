@@ -32,18 +32,18 @@ func newRouter(log *slog.Logger, db *postgres.Storage, cfg *config.Config) *gin.
 	router.Use(middleware.Logger(log))
 
 	{
-		v1 := router.Group("/url")
-		v1.POST("", handler.Save(log, db))
+		root := router.Group("/url")
+		root.POST("", middleware.JSONParser[handler.SaveRequest](log), handler.Save(log, db))
 		{
-			v12 := v1.Group("/delete")
-			v12.Use(gin.BasicAuth(gin.Accounts{
+			authoritative := root.Group("/delete")
+			authoritative.Use(gin.BasicAuth(gin.Accounts{
 				cfg.User: cfg.Password,
 			}))
-			v12.DELETE("", handler.Delete(log, db))
+			authoritative.DELETE("", middleware.JSONParser[handler.DeleteRequest](log), handler.Delete(log, db))
 		}
 	}
 
-	router.GET("/:alias", handler.Redirect(log, db))
+	router.GET("/:alias", middleware.SegmentParser[handler.Alias](log), handler.Redirect(log, db))
 
 	return router
 }

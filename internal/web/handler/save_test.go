@@ -14,7 +14,9 @@ import (
 	"testing"
 	"url-shortener/internal/db"
 	"url-shortener/internal/logger"
+	"url-shortener/internal/web/api"
 	"url-shortener/internal/web/handler/mocks"
+	"url-shortener/internal/web/middleware"
 )
 
 func TestSave(t *testing.T) {
@@ -47,13 +49,13 @@ func TestSave(t *testing.T) {
 			name:      "save fail",
 			url:       "http://test.com",
 			alias:     "alias",
-			funcError: ErrFailSaveURL.Error,
+			funcError: api.ErrSave.Error,
 			mockError: errors.New("unexpected error"),
 		},
 		{
 			name:      "existing url",
 			url:       "http://existing.com",
-			funcError: ErrURLExists.Error,
+			funcError: api.ErrURLExists.Error,
 			mockError: db.ErrURLAlreadyExists,
 		},
 	}
@@ -81,7 +83,8 @@ func TestSave(t *testing.T) {
 			require.NoError(t, err)
 
 			router := gin.New()
-			router.POST("/url", Save(logger.NewDummyLogger(), mockURLSaver))
+			log := logger.NewDummyLogger()
+			router.POST("/url", middleware.JSONParser[SaveRequest](log), Save(log, mockURLSaver))
 
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
