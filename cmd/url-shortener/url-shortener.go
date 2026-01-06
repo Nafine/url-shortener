@@ -21,7 +21,7 @@ func main() {
 	log.Info("logger initialized")
 	log.Debug("debug messages enabled")
 
-	db, err := postgres.New(cfg.Storage)
+	db, err := postgres.New(cfg.StorageDSN)
 	if err != nil {
 		log.Error("error initializing database", logger.Err(err))
 		os.Exit(1)

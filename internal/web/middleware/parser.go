@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/logger"
+	"url-shortener/internal/validation"
 	"url-shortener/internal/web/api"
 )
 
@@ -27,7 +28,7 @@ func parseJSON[T any](parseCtx api.Context) (T, error) {
 	if err := parseCtx.Ctx.ShouldBindJSON(&req); err != nil {
 		abortInvalidRequest(parseCtx, err)
 		return req, err
-	} else if err := validator.New().Struct(req); err != nil {
+	} else if err := validation.Validate.Struct(req); err != nil {
 		abortInvalidRequestFields(parseCtx, err)
 		return req, err
 	}
@@ -49,7 +50,7 @@ func parseUri[T any](parseCtx api.Context) (T, error) {
 	if err := parseCtx.Ctx.ShouldBindUri(&uriSegment); err != nil {
 		abortInvalidRequest(parseCtx, err)
 		return uriSegment, err
-	} else if err := validator.New().Struct(uriSegment); err != nil {
+	} else if err := validation.Validate.Struct(uriSegment); err != nil {
 		abortInvalidRequestFields(parseCtx, err)
 		return uriSegment, err
 	}

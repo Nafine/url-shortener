@@ -3,6 +3,7 @@ package web
 import (
 	"github.com/gin-gonic/gin"
 	"log/slog"
+	"url-shortener/internal/auth"
 	"url-shortener/internal/config"
 	"url-shortener/internal/db/postgres"
 	"url-shortener/internal/web/handler"
@@ -15,7 +16,7 @@ type Server struct {
 }
 
 func New(cfg *config.Config, log *slog.Logger, db *postgres.Storage) *Server {
-	if cfg.Env == "prod" {
+	if cfg.AppEnv == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -36,9 +37,7 @@ func newRouter(log *slog.Logger, db *postgres.Storage, cfg *config.Config) *gin.
 		root.POST("", middleware.JSONParser[handler.SaveRequest](log), handler.Save(log, db))
 		{
 			authoritative := root.Group("/delete")
-			authoritative.Use(gin.BasicAuth(gin.Accounts{
-				cfg.User: cfg.Password,
-			}))
+			authoritative.Use(middleware.APIKeyAuth(log, auth.LoadKeys()))
 			authoritative.DELETE("", middleware.JSONParser[handler.DeleteRequest](log), handler.Delete(log, db))
 		}
 	}

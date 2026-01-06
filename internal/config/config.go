@@ -4,39 +4,39 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
-	"log"
 	"os"
 	"time"
 )
 
 type HTTPServer struct {
-	Address     string        `yaml:"address" env-default:":8080"`
-	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
-	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
-	User        string        `yaml:"user" env-required:"true"`
-	Password    string        `yaml:"password" env-required:"true" env:"HTTP_SERVER_PASSWORD"`
+	Address     string        `yaml:"address" env:"HTTP_ADDRESS" env-default:":8080"`
+	Timeout     time.Duration `yaml:"timeout" env:"HTTP_TIMEOUT" env-default:"5s"`
+	IdleTimeout time.Duration `yaml:"idleTimeout" env:"HTTP_IDLE_TIMEOUT" env-default:"60s"`
 }
 
 type Config struct {
-	Env        string `yaml:"env" env-default:"local"`
-	Storage    string `yaml:"storage" env-required:"true" env:"STORAGE_PATH"`
-	HTTPServer `yaml:"http_server"`
+	AppEnv     string `yaml:"appEnv" env:"APP_ENV" env-default:"local"`
+	StorageDSN string `yaml:"storageDsn" env:"STORAGE_DSN" env-required:"true"`
+	HTTPServer
 }
 
 func Get() (*Config, error) {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		return nil, errors.New("CONFIG_PATH environment variable not set")
+	var cfg Config
+
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		return nil, err
 	}
+
+	configPath := os.Getenv("CONFIG_PATH")
 
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		return nil, errors.New("can't find config file at path: " + configPath)
 	}
 
-	var cfg Config
-
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("Error reading config file: %s\n", err)
+	if path := os.Getenv("CONFIG_PATH"); path != "" {
+		if err := cleanenv.ReadConfig(path, &cfg); err != nil {
+			return nil, err
+		}
 	}
 
 	fmt.Println("Read config file:", configPath, cfg)

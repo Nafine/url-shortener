@@ -8,7 +8,7 @@ import (
 )
 
 func New(cfg *config.Config) *slog.Logger {
-	switch cfg.Env {
+	switch cfg.AppEnv {
 	case "local":
 		return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	case "dev":
@@ -16,7 +16,7 @@ func New(cfg *config.Config) *slog.Logger {
 	case "prod":
 		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	default:
-		panic(fmt.Sprintf("invalid env from cfg: %s", cfg.Env))
+		panic(fmt.Sprintf("invalid env from cfg: %s", cfg.AppEnv))
 	}
 }
 
