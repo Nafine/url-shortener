@@ -16,6 +16,7 @@ import (
 	"url-shortener/internal/logger"
 	"url-shortener/internal/web/api"
 	"url-shortener/internal/web/handler/mocks"
+	"url-shortener/internal/web/middleware"
 )
 
 func TestSave(t *testing.T) {
@@ -82,7 +83,8 @@ func TestSave(t *testing.T) {
 			require.NoError(t, err)
 
 			router := gin.New()
-			router.POST("/url", Save(logger.NewDummyLogger(), mockURLSaver))
+			log := logger.NewDummyLogger()
+			router.POST("/url", middleware.JSONParser[SaveRequest](log), Save(log, mockURLSaver))
 
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)

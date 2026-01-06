@@ -14,6 +14,7 @@ import (
 	"url-shortener/internal/logger"
 	"url-shortener/internal/web/api"
 	"url-shortener/internal/web/handler/mocks"
+	"url-shortener/internal/web/middleware"
 )
 
 func TestDelete(t *testing.T) {
@@ -36,7 +37,7 @@ func TestDelete(t *testing.T) {
 		{
 			name:      "empty alias",
 			alias:     "",
-			funcError: api.ErrEmptyAlias.Error,
+			funcError: "field Alias is a required field",
 		},
 		{
 			name:      "deletion error",
@@ -60,7 +61,8 @@ func TestDelete(t *testing.T) {
 			assert.NoError(t, err)
 
 			router := gin.New()
-			router.DELETE("/url/delete", Delete(logger.NewDummyLogger(), mockURLDeleter))
+			log := logger.NewDummyLogger()
+			router.DELETE("/url/delete", middleware.JSONParser[DeleteRequest](log), Delete(log, mockURLDeleter))
 
 			w := httptest.NewRecorder()
 

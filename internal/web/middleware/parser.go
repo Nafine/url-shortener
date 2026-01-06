@@ -28,7 +28,7 @@ func parseJSON[T any](parseCtx api.Context) (T, error) {
 	if err := parseCtx.Ctx.ShouldBindJSON(&req); err != nil {
 		abortInvalidRequest(parseCtx, err)
 		return req, err
-	} else if err := validation.Validate.Struct(req); err != nil {
+	} else if err := validation.Get().Struct(req); err != nil {
 		abortInvalidRequestFields(parseCtx, err)
 		return req, err
 	}
@@ -50,7 +50,7 @@ func parseUri[T any](parseCtx api.Context) (T, error) {
 	if err := parseCtx.Ctx.ShouldBindUri(&uriSegment); err != nil {
 		abortInvalidRequest(parseCtx, err)
 		return uriSegment, err
-	} else if err := validation.Validate.Struct(uriSegment); err != nil {
+	} else if err := validation.Get().Struct(uriSegment); err != nil {
 		abortInvalidRequestFields(parseCtx, err)
 		return uriSegment, err
 	}

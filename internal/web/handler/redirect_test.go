@@ -11,6 +11,7 @@ import (
 	"url-shortener/internal/logger"
 	"url-shortener/internal/web/api"
 	"url-shortener/internal/web/handler/mocks"
+	"url-shortener/internal/web/middleware"
 )
 
 func TestRedirect(t *testing.T) {
@@ -27,12 +28,12 @@ func TestRedirect(t *testing.T) {
 		{
 			name:      "invalid alias1",
 			alias:     "1 23",
-			funcError: api.ErrInvalidRequest.Error,
+			funcError: "field Alias is an invalid URL segment",
 		},
 		{
 			name:      "invalid alias2",
 			alias:     "123<<",
-			funcError: api.ErrInvalidRequest.Error,
+			funcError: "field Alias is an invalid URL segment",
 		},
 	}
 
@@ -48,7 +49,8 @@ func TestRedirect(t *testing.T) {
 			}
 
 			router := gin.New()
-			router.GET("/url/:alias", Redirect(logger.NewDummyLogger(), mockURLGetter))
+			log := logger.NewDummyLogger()
+			router.GET("/url/:alias", middleware.SegmentParser[Alias](log), Redirect(log, mockURLGetter))
 
 			req, err := http.NewRequest(http.MethodGet, "http://localhost:8080/url/"+test.alias, nil)
 			require.NoError(t, err)
