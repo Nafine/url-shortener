@@ -29,7 +29,7 @@ func Get() (*Config, error) {
 
 	configPath := os.Getenv("CONFIG_PATH")
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+	if _, err := os.Stat(configPath); configPath != "" && os.IsNotExist(err) {
 		return nil, errors.New("can't find config file at path: " + configPath)
 	}
 

@@ -1,0 +1,6 @@
+config
+deploy
+.github
+.gitignore
+.mockery.yml
+env
