@@ -1,12 +1,20 @@
-FROM golang:1.26rc1-alpine3.23
+FROM golang:1.26rc1-alpine3.23 AS builder
+
+WORKDIR /workspace
+
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
-RUN addgroup -g 1001 shortener && \
-    adduser -D -u 1001 -G shortener shortener
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager ./cmd/url-shortener/url-shortener.go
 
-RUN go mod download
+FROM gcr.io/distroless/static:nonroot
 
-ENTRYPOINT ["go", "run"]
+WORKDIR /app
 
-CMD ["./cmd/url-shortener/url-shortener.go"]
+COPY --from=builder /workspace/manager .
+
+USER nonroot
+
+ENTRYPOINT ["/app/manager"]
