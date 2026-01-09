@@ -2,12 +2,12 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/nafine/url-shortener/internal/auth"
+	"github.com/nafine/url-shortener/internal/config"
+	"github.com/nafine/url-shortener/internal/db/postgres"
+	"github.com/nafine/url-shortener/internal/web/handler"
+	"github.com/nafine/url-shortener/internal/web/middleware"
 	"log/slog"
-	"url-shortener/internal/auth"
-	"url-shortener/internal/config"
-	"url-shortener/internal/db/postgres"
-	"url-shortener/internal/web/handler"
-	"url-shortener/internal/web/middleware"
 )
 
 type Server struct {

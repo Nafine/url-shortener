@@ -3,12 +3,12 @@ package handler
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/nafine/url-shortener/internal/db"
+	"github.com/nafine/url-shortener/internal/logger"
+	"github.com/nafine/url-shortener/internal/web/api"
+	"github.com/nafine/url-shortener/internal/web/middleware"
 	"log/slog"
 	"net/http"
-	"url-shortener/internal/db"
-	"url-shortener/internal/logger"
-	"url-shortener/internal/web/api"
-	"url-shortener/internal/web/middleware"
 )
 
 type URLGetter interface {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
-	"url-shortener/internal/db"
+	"github.com/nafine/url-shortener/internal/db"
 )
 
 type Storage struct {

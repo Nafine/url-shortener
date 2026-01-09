@@ -2,9 +2,9 @@ package logger
 
 import (
 	"fmt"
+	"github.com/nafine/url-shortener/internal/config"
 	"log/slog"
 	"os"
-	"url-shortener/internal/config"
 )
 
 func New(cfg *config.Config) *slog.Logger {

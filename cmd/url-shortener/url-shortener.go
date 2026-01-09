@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/nafine/url-shortener/internal/config"
+	"github.com/nafine/url-shortener/internal/db/postgres"
+	"github.com/nafine/url-shortener/internal/logger"
+	"github.com/nafine/url-shortener/internal/validation"
+	"github.com/nafine/url-shortener/internal/web"
 	"os"
-	"url-shortener/internal/config"
-	"url-shortener/internal/db/postgres"
-	"url-shortener/internal/logger"
-	"url-shortener/internal/validation"
-	"url-shortener/internal/web"
 )
 
 func main() {

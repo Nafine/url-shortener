@@ -3,11 +3,11 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/nafine/url-shortener/internal/logger"
+	"github.com/nafine/url-shortener/internal/validation"
+	"github.com/nafine/url-shortener/internal/web/api"
 	"log/slog"
 	"net/http"
-	"url-shortener/internal/logger"
-	"url-shortener/internal/validation"
-	"url-shortener/internal/web/api"
 )
 
 const RequestBody = "requestBody"

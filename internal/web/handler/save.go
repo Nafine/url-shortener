@@ -4,14 +4,14 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/nafine/url-shortener/internal/db"
+	"github.com/nafine/url-shortener/internal/logger"
+	"github.com/nafine/url-shortener/internal/random"
+	"github.com/nafine/url-shortener/internal/web/api"
+	"github.com/nafine/url-shortener/internal/web/middleware"
 	"log/slog"
 	"math/rand"
 	"net/http"
-	"url-shortener/internal/db"
-	"url-shortener/internal/logger"
-	"url-shortener/internal/random"
-	"url-shortener/internal/web/api"
-	"url-shortener/internal/web/middleware"
 )
 
 type SaveRequest struct {
