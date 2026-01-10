@@ -18,15 +18,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	log := logger.New(cfg)
+	log.Info("logger initialized")
+	log.Debug("debug messages enabled")
+
 	apiKeys, err := auth.LoadKeys()
 	if err != nil {
 		fmt.Println("Error loading keys: ", err)
 		os.Exit(1)
 	}
 
-	log := logger.New(cfg)
-	log.Info("logger initialized")
-	log.Debug("debug messages enabled")
+	log.Info("api keys loaded")
 
 	db, err := postgres.New(cfg.StorageDSN)
 	if err != nil {
