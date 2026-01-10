@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/nafine/url-shortener/internal/auth"
 	"github.com/nafine/url-shortener/internal/config"
@@ -21,7 +22,7 @@ func New(cfg *config.Config, log *slog.Logger, db *postgres.Storage) *Server {
 	}
 
 	return &Server{
-		address: cfg.Address,
+		address: fmt.Sprintf("%v:%v", cfg.Host, cfg.Port),
 		router:  newRouter(log, db, cfg),
 	}
 }

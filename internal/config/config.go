@@ -9,7 +9,8 @@ import (
 )
 
 type HTTPServer struct {
-	Address     string        `yaml:"address" env:"HTTP_ADDRESS" env-default:":8080"`
+	Host        string        `yaml:"host" env:"HTTP_HOST" env-default:"0.0.0.0"`
+	Port        string        `yaml:"port" env:"HTTP_PORT" env-default:"8080"`
 	Timeout     time.Duration `yaml:"timeout" env:"HTTP_TIMEOUT" env-default:"5s"`
 	IdleTimeout time.Duration `yaml:"idleTimeout" env:"HTTP_IDLE_TIMEOUT" env-default:"60s"`
 }
