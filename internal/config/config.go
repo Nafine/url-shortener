@@ -18,7 +18,7 @@ type HTTPServer struct {
 type Config struct {
 	AppEnv     string `yaml:"appEnv" env:"APP_ENV" env-default:"local"`
 	StorageDSN string `yaml:"storageDsn" env:"STORAGE_DSN" env-required:"true"`
-	HTTPServer
+	HTTPServer `yaml:"http"`
 }
 
 func Get() (*Config, error) {

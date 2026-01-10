@@ -1,6 +1,7 @@
-env: "prod"
-http_server:
-  address: "0.0.0.0:8080"
+appEnv: "local"
+storageDsn: postgresql://username:2222@host_name/db_name?sslmode=disable
+http:
+  host: "0.0.0.0"
+  port: "8080"
   timeout: 4s
-  idle_timeout: 60s
-  user: "nafine"
+  idleTimeout: 20s
