@@ -30,16 +30,24 @@ func Get() (*Config, error) {
 
 	configPath := os.Getenv("CONFIG_PATH")
 
-	if _, err := os.Stat(configPath); configPath != "" && os.IsNotExist(err) {
-		return nil, errors.New("can't find config file at path: " + configPath)
-	}
-
-	if path := os.Getenv("CONFIG_PATH"); path != "" {
-		if err := cleanenv.ReadConfig(path, &cfg); err != nil {
+	if configPath != "" {
+		if err := ReadFromFile(configPath, &cfg); err != nil {
 			return nil, err
 		}
 	}
 
-	fmt.Println("Read config file:", configPath, cfg)
 	return &cfg, nil
+}
+
+func ReadFromFile[T any](configPath string, cfg *T) error {
+	if _, err := os.Stat(configPath); configPath != "" && os.IsNotExist(err) {
+		return errors.New("Can't find config file at path: " + configPath)
+	}
+
+	if err := cleanenv.ReadConfig(configPath, cfg); err != nil {
+		return err
+	}
+
+	fmt.Println("Read config file:", configPath, cfg)
+	return nil
 }

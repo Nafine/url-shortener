@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/nafine/url-shortener/internal/auth"
 	"github.com/nafine/url-shortener/internal/config"
 	"github.com/nafine/url-shortener/internal/db/postgres"
 	"github.com/nafine/url-shortener/internal/logger"
@@ -17,6 +18,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	apiKeys, err := auth.LoadKeys()
+	if err != nil {
+		fmt.Println("Error loading keys: ", err)
+		os.Exit(1)
+	}
+
 	log := logger.New(cfg)
 	log.Info("logger initialized")
 	log.Debug("debug messages enabled")
@@ -29,7 +36,7 @@ func main() {
 	log.Info("database initialized")
 
 	validation.Init()
-	server := web.New(cfg, log, db)
+	server := web.New(cfg, apiKeys, log, db)
 
 	log.Info("starting server")
 	if err := server.Start(); err != nil {

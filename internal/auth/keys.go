@@ -1,19 +1,31 @@
 package auth
 
 import (
-	"os"
-	"strings"
+	"github.com/nafine/url-shortener/internal/config"
 )
 
-func LoadKeys() map[string]string {
-	raw := os.Getenv("API_KEYS")
-	keys := make(map[string]string)
-	for _, pair := range strings.Split(raw, ",") {
-		user, key, ok := strings.Cut(pair, ":")
-		if !ok {
-			continue
-		}
-		keys[user] = key
+type APIKey struct {
+	User string `yaml:"user"`
+	Key  string `yaml:"key"`
+}
+
+type ApiKeys struct {
+	Keys []APIKey `yaml:"keys"`
+}
+
+func LoadKeys() (map[string]string, error) {
+	configPath := "/etc/shortener/apiKeys.yaml"
+
+	var apiKeys ApiKeys
+
+	if err := config.ReadFromFile(configPath, &apiKeys); err != nil {
+		return nil, err
 	}
-	return keys
+
+	valid := make(map[string]string)
+	for _, k := range apiKeys.Keys {
+		valid[k.Key] = k.User
+	}
+
+	return valid, nil
 }
