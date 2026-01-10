@@ -1,4 +1,6 @@
 FROM golang:1.26rc1-alpine3.23 AS builder
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /workspace
 
@@ -7,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -o manager ./cmd/url-shortener/url-shortener.go
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o manager ./cmd/url-shortener/url-shortener.go
 
 FROM gcr.io/distroless/static:nonroot
 
